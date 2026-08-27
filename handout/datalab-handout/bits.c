@@ -240,7 +240,12 @@ int negate(int x)
  */
 int isAsciiDigit(int x)
 {
-    return 2;
+    // 임의의 수가 10보다 크거나 같은지 확인하려면 10을 뺀 값이 음수인지 확인하면 된다.
+    int min = 0x30;
+    int max = 0x39;
+    int is_more_or_equal_than_min = !((x + (~min + 1)) >> 31 & 1);
+    int is_less_or_equal_than_max = ((x + (~max + 0)) >> 31 & 1);
+    return (is_more_or_equal_than_min & is_less_or_equal_than_max);
 }
 /*
  * conditional - same as x ? y : z
