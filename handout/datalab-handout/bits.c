@@ -207,7 +207,15 @@ int isTmax(int x)
  */
 int allOddBits(int x)
 {
-    return 2;
+    // 1. 몇 칸 만큼 차지하는지 알면 shift 연산 후 10101010..10과 함께 정확히 일치하는지 비교해서 확인할 수 있다.
+    // 2. 1010...10은 0101...01을 2배 한 값이다.
+    // 3. (msb-1 미만의 비트만 사용한 1 이상의) 값에 << 연산을 한 번 해주면 2배가 된다.
+    // int mask_08bit = 0b10101010;
+    int mask_08bit = 0xAA;
+    int mask_16bit = (mask_08bit << 8) | mask_08bit;
+    int mask_32bit = (mask_16bit << 16) | mask_16bit;
+    int x_after_mask = x & mask_32bit;
+    return !(x_after_mask ^ mask_32bit);
 }
 /*
  * negate - return -x
