@@ -143,12 +143,18 @@ NOTES:
  */
 int bitXor(int x, int y)
 {
-    // "0, 0" 조합만 제외하면 & 후 ~으로 다 된다.
-    int process_except_00 = ~(x & y);
-    // 이후 "0, 0" 조합만 제거해버리면 된다.
-    int remove_00 = ~(~x & ~y);
+    // This works but less natural.
+    // // "0, 0" 조합만 제외하면 & 후 ~으로 다 된다.
+    // int process_except_00 = ~(x & y);
+    // // 이후 "0, 0" 조합만 제거해버리면 된다.
+    // int remove_00 = ~(~x & ~y);
+    //
+    // return (process_except_00 & remove_00);
 
-    return (process_except_00 & remove_00);
+    int keep_only_11 = x & y;
+    int keep_only_00 = ~x & ~y;
+    // 각각 11과 00 조합이었던것만 살려놨으면 양쪽 모두 만족하는 것은 01, 10 뿐이다.
+    return (~keep_only_00 & ~keep_only_11);
 }
 /*
  * tmin - return minimum two's complement integer
