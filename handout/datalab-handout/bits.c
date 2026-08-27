@@ -170,7 +170,26 @@ int tmin(void)
  */
 int isTmax(int x)
 {
-    return 2;
+    // try: 1
+    // int two_complement = ~(x + 1) + 1;
+    // int msb_only = (((x + 1) & two_complement) >> 31) & 1;
+    // return (msb_only);
+
+    // try: 2
+    // return (!(~((x + 1) ^ x)));
+
+    // try: 3
+    // int plus_one = x + 1;
+    // int plus_one_two_comp = ~plus_one + 1;
+    // int mask_msb =
+
+    // try: 4
+    // 0이 아니면서 "2의 보수"가 자기 자신과 같은 수
+    int n = x + 1;
+    int zero_if_n_zero = !!n & 1;
+    int n_two_compl = ~n + 1;
+    int is_self_two_compl = (!(n ^ n_two_compl)) & 1;
+    return (zero_if_n_zero & is_self_two_compl);
 }
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
