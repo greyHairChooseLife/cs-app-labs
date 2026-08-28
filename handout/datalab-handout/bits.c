@@ -256,7 +256,10 @@ int isAsciiDigit(int x)
  */
 int conditional(int x, int y, int z)
 {
-    return 2;
+    // x를 0b00..0 또는 0b11..1로 만들어서 두 operand를 마스킹한다. 그럼 한쪽은 어차피 0이 되니까 그냥 OR(`|`) 해주면 그만
+    int process_y = ((!!x << 31) >> 31) & y;
+    int process_z = ((!x << 31) >> 31) & z;
+    return (process_y | process_z);
 }
 /*
  * isLessOrEqual - if x <= y  then return 1, else return 0
