@@ -271,7 +271,12 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
-    return 2;
+    // x가 더 크면 0을 리턴
+    // => if (y - x < 0) && return (0);
+    // 음수인지 확인은 msb로
+    int difference = y + (~x + 1);
+    int is_difference_negative = (difference >> 31) & 1;
+    return (!is_difference_negative);
 }
 // 4
 /*
