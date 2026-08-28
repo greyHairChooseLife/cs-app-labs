@@ -289,7 +289,13 @@ int isLessOrEqual(int x, int y)
  */
 int logicalNeg(int x)
 {
-    return 2;
+    // 나의 접근법: x가 0인 경우와 그렇지 않은 모든 경우를 구분하는 방법은
+    //  x와 x의 2's complement의 &연산 결과가 0인지 확인하는 것이다.
+    //  따라서 이를 수행한 뒤에 0은 1로, 0이 아닌 것은 1로 만드는 연산을 수행하면 될 것 같다.
+    //  0의 보수는 여전히 0인 점을 활용해 보수를 `|` 연산 해준다. 그럼 0이 아닌 애들은 msb가 항상 1이된다.
+    int classify_zero = x | (~x + 1); // 0 또는 0이 아닌 애들로 구분됨
+    int mark_msb = classify_zero | (~classify_zero + 1); // msb만 봐도 0 또는 0이 아닌 애들로 구분됨
+    return ((~mark_msb >> 31) & 1); // 반대로 출력해야하니까 비트 반전을 하고, msb를 lsb로 몰아넣고난 뒤에 반환
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
