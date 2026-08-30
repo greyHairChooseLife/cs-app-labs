@@ -311,7 +311,99 @@ int logicalNeg(int x)
  */
 int howManyBits(int x)
 {
-    return 0;
+    // try: 1
+    // 일단 음수는 생각을 못했어. msb가 0이라는 가정하에,
+    //  >> 연산을 31회 수행하며 count를 1씩 누적해가고
+    //  이때 lsb의 값이 1이면 flag를 true로 만들고 이때 count로 반환값을 갱신한다.
+    //  근데 이러면 31 * operator라서 일단 안되겠는데?
+    //  접근 방법이 옳다면 효율화를 고민해보자.
+    // int count = 0;
+    // int flag;
+    // int result;
+    //
+    // count = count + 1;
+    // flag = x & 1;
+    // result = ((!!flag << 31) >> 31) & count;
+    // x = x >> 1;
+
+    // try: 2 helped by deepseek
+    // 1. 부호 비트의 필요 여부
+    // 2. 이외의 최상위 비트는 몇번째 위치에 등장하는가?
+    //      즉, 31회 비트를 옮겨보면서 1인지 확인하면 될 듯?
+    // WRONG: 30회 shift연산을 하며 "0 or k"를 31개 도출하더라도 그것들을 어떤 연산자로 묶더라도 최상위 하나만 남길 방법이 없다.
+
+    // try: 3 helped by deepseek
+    // 1. (부호 비트를 제외하고)하나의 N번째 비트가 1이라는 것이 의미하는 바는 값이 최소 2^(n-1) 이상의 값이라는 것을 의미한다.
+    //    하위 비트가 1이든 0이든 상관없어.
+    // ?. 일단 음수인지 판단해서 양수로 만들고 각 비트가 1일때의 최소값들을 빼줘볼까? 최소값보다도 작으면 해당 비트 자리수는 의미 없으니까
+    // ?. 이분탐색으로 절반씩 탐색하며 최대 위치의 1을 찾아본다.
+    //      ?. 일단 양수로 만들기 vs 적절히 마스킹하기
+    //         1. 일단 양수 -> shift연산 해도 오염되지 않아서 편리하다.
+    //         2. 적절히 마스킹 -> 어차피 masking 되면 의미 없다. -> 이게 나은듯?
+    //      ?. 근데 이분탐색 하려면 판단 후 좌/우 어느방향 shift인지 판단을 해야하는데?? 말이되나
+    //
+
+    // try: 4 helped by deepseek
+    // 1. 일단 부호비트 버려주면서 따로 처리
+    // 2. (부호비트 떼어낸 채로)최상위 비트 자리수를 이분탐색으로 찾기
+    // 3. 이때 최상위 비트란 양수인 경우 1을 찾아주고, 음수인 경우 0을 찾아주면 된다.
+    //      양수인 경우 1이 (자리수로서) 의미있고, 음수인 경우 0이 (자리수로서) 의미있기 때문.
+
+    int a = 1 << 16;
+    int b = 1 << 8;
+    int c = 1 << 4;
+    int d = 1 << 2;
+    int e = 1 << 1;
+    int is_less_then_a;
+    int mask_a;
+    int is_less_then_b;
+    int mask_b;
+    int is_less_then_c;
+    int mask_c;
+    int is_less_then_d;
+    int mask_d;
+    int is_less_then_e;
+    int mask_e;
+
+    int is_negative = (x >> 31) & 1;
+    int x_mask = ((!is_negative << 31) >> 31); // x가 양수이면 111..1, 아니면 000..0. 음수이면 반대로
+    int _x = (x_mask & x) | (~x_mask & ~x); // 최상위 비트란 양수인 경우 1을 찾아주고, 음수인 경우 0을 찾아주면 된다.
+    // pintf("%#034b, %d\n", _x, _x);
+
+    int result = 0;
+
+    is_less_then_a = ((_x + (~a + 1)) >> 31) & 1; // -> 1이라고? 음수가 나왔어? _x보다 a가 더 크다. shift필요 없다.
+    mask_a = ((!is_less_then_a << 31) >> 31);
+    _x = _x >> (16 & mask_a);
+    result = result + (16 & mask_a);
+    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_a, result);
+
+    is_less_then_b = ((_x + (~b + 1)) >> 31) & 1;
+    mask_b = ((!is_less_then_b << 31) >> 31);
+    _x = _x >> (8 & mask_b);
+    result = result + (8 & mask_b);
+    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_b, result);
+
+    is_less_then_c = ((_x + (~c + 1)) >> 31) & 1; // -> 1이라고? 음수가 나왔어? _x보다 a가 더 크다. shift필요 없다.
+    mask_c = ((!is_less_then_c << 31) >> 31);
+    _x = _x >> (4 & mask_c);
+    result = result + (4 & mask_c);
+    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_c, result);
+
+    is_less_then_d = ((_x + (~d + 1)) >> 31) & 1; // -> 1이라고? 음수가 나왔어? _x보다 a가 더 크다. shift필요 없다.
+    mask_d = ((!is_less_then_d << 31) >> 31);
+    _x = _x >> (2 & mask_d);
+    result = result + (2 & mask_d);
+    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_d, result);
+
+    is_less_then_e = ((_x + (~e + 1)) >> 31) & 1; // -> 1이라고? 음수가 나왔어? _x보다 a가 더 크다. shift필요 없다.
+    mask_e = ((!is_less_then_e << 31) >> 31);
+    _x = _x >> (1 & mask_e);
+    result = result + (1 & mask_e);
+    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_e, result);
+    // result = (((!!result << 31) >> 31) & (result + 1 + 1)) | (((!result << 31) >> 31) & 1);// 양수든 음수든 부호 비트 하나는 필요하고, 아래 방식이면 자리수가 1비트 만큼 덜 표현된다.
+    result = 1 + (((!!result << 31) >> 31) & (result)) + _x; // 부호 비트 + 누적 result + _x(1 or 0)
+    return (result);
 }
 // float
 /*
