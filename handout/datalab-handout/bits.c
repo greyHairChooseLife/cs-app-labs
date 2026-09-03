@@ -271,6 +271,8 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
+    // WARN: 와 이거 틀렸다. x가 INT_MIN일 때 틀림. 이놈들 경계값 체크를 안하네
+
     // x가 더 크면 0을 리턴
     // => if (y - x < 0) && return (0);
     // 음수인지 확인은 msb로
