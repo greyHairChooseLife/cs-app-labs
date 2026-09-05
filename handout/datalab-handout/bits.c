@@ -421,7 +421,46 @@ int howManyBits(int x)
  */
 unsigned floatScale2(unsigned uf)
 {
-    return 2;
+    // 1~8번째 비트를 1 키운다.
+    int exponent_field_masking = ((0x7F << 1) + 1) << 23;
+    // printf("%#034b\n", exponent_field_masking);
+    int exponent_field_value = (uf & exponent_field_masking) >> 23;
+
+    int fraction_field_masking = (1 << 23) - 1;
+    int fraction_field_value = uf & fraction_field_masking;
+    // printf("%#034b\n", fraction_field_masking);
+    int sign_masking = 1 << 31;
+    int sign_bit = uf & sign_masking;
+
+    int is_NaN = (exponent_field_value == 0xFF) && (fraction_field_value != 0);
+
+    // case: 0x80000000 -> 음수 0에 해당하는 실수. 그대로 음수 0을 리턴해야한다.
+    int is_zero = (exponent_field_value == 0) && (fraction_field_value == 0);
+    // printf("is_zero? %d\n", is_zero);
+
+    // case: 0x80_0000 -> 0  000_0000_1  000_0000_0000_0000_0000_0000
+    // 1.f = 1.0 * 2^{-126}   -> 0x010000...
+
+    // case: 0x1 -> 0  000_0000_0  000_0000_0000_0000_0000_0001
+    int is_denormal = exponent_field_value == 0x00;
+
+    // case: 0x7f800000  ->  0 111_1 1111 000_....
+    int is_infinit = exponent_field_value == 0xFF;
+
+    if (is_zero)
+        return (uf);
+
+    if (is_NaN)
+        return (uf);
+
+    if (is_denormal)
+        return (((uf << 1) >> 1) * 2) | sign_bit;
+
+    if (is_infinit)
+        return uf | sign_bit;
+
+    // normal case: exponent+1 to double
+    return (uf & ~exponent_field_masking) | (exponent_field_value + 1) << 23;
 }
 /*
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
