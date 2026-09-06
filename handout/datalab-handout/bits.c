@@ -549,5 +549,30 @@ int floatFloat2Int(unsigned uf)
  */
 unsigned floatPower2(int x)
 {
-    return 2;
+    // s_field = 0 (무조건 0 이상이다)
+    // f_field = 0x000...(23)..0  -> normalized value == 1.0
+    // e_field = 0x이걸로 배수 조절. x + bias
+    //  그럼 normal구간, denormal 구간이 따로 고려되야할듯
+    int bias = 0x7F;
+    int exponent = (x + bias) << 23;
+    int postive_infinity = 0xFF << 23;
+
+    // case: 0x8000_0000 -> 0
+    // 이놈은 음수로 너무 크다. 즉, denormal로 표현하기에도 한계가 있다.
+    // 본래 denormal이란 2^{-126} * 0.xxxx..(23)..x
+    // 즉, x가 -127일때도 가능. 언제까지? 23번까지는 표현할  수있어.
+    if (x < -127 - 23)
+        return (0);
+
+    // case: 0x800000 -> 0x7f80_0000  -->  0 111_1 111_1 000_0000_....
+    // 어랍쇼 지수가 너무 큰데요?
+    if (x >= 128)
+        return (postive_infinity);
+
+    // case: 31 -> 0x4f00_0000  -->  0 100_1 111_0 000_....
+    // case: 32 -> 0x4f80_0000  -->  0 100_1 111_1 000_....
+    // case: 1 -> 0x4000_0000  -->  0 010_0 000_0 000_0000....
+    // case: 0 -> 0x3f80_0000  -->  0 011_1 111_1 000_0000_.....
+    // 기본적인 x + bias 개념 확인
+    return (exponent);
 }
