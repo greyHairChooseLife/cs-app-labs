@@ -257,7 +257,7 @@ int isAsciiDigit(int x)
 int conditional(int x, int y, int z)
 {
     // x를 0b00..0 또는 0b11..1로 만들어서 두 operand를 마스킹한다. 그럼 한쪽은 어차피 0이 되니까 그냥 OR(`|`) 해주면 그만
-    int process_x = !!x >> 31;
+    int process_x = ((!!x << 31) >> 31);
     int process_y = process_x & y;
     int process_z = ~process_x & z;
     return (process_y | process_z);
