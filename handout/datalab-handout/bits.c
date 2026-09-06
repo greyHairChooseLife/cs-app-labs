@@ -476,7 +476,63 @@ unsigned floatScale2(unsigned uf)
  */
 int floatFloat2Int(unsigned uf)
 {
-    return 2;
+    // int casting means discarding the part under a point.
+    // then the key of this question is finding the point using exponent.
+    // e == 0 -> 23개 버림
+    // e == 1 -> 22개 버림
+    // e == 2 -> 21개 버림
+    // 즉,  e <= 0 다 버림
+    // else 23 - e 만큼 버림
+    int s_mask = 1 << 31;
+    int e_mask = 0xFF << 23;
+    // int f_mask = (1 << 23) - 1;
+
+    int exponent = ((uf & e_mask) >> 23) - 127;
+    // printf("expo: %d\n", exponent);
+    // int fraction = uf & f_mask;
+
+    int casting_mask = (1 >> 23) & 1 << (exponent <= 23 ? 23 - exponent : 0);
+
+    // 예외처리
+    int is_exponent_field_all_1 = ((uf & e_mask) >> 23) == 0xFF;
+
+    // printf("0\n");
+    if (is_exponent_field_all_1)
+        return (0x80000000u);
+
+    // case: 0x80000000  ->  1 000_0 000_0 000_....
+    // case: 0x80800000  ->  1 000_0 000_1 000_....
+    // 음수 0에 해당하는데, int 타입엔 음수 0같은것은 없으니 그냥 0으로 만들어야한다.
+    //
+    // case: 0x7f_ffff  ->  0 000_0 000_0 111_1111__1111_1111_....
+    // denormal에 fraction은 0.111...(23)..1
+    // denormal은 그냥 0과 0.x사이니까 sign도 없이 0 리턴해야지.
+    if (exponent < 0)
+        return 0;
+
+    // case: 0x3f800000  ->  0 011_1 111_1 000_....
+    // normalized number에 2^{0}을 곱하는 셈이니, 부호만 유지한 채 1을 리턴해야한다.
+    // case: 0xbf800000  ->  1 011_1 111_1 000_...
+    // 이때 음수는 2의 보수를 구해줘야한다.
+    // printf("2\n");
+    if (exponent == 0)
+    {
+        if (((uf & s_mask) >> 31) == 0) // 양수라면
+            return (1);
+        else
+            return (-1);
+    }
+
+    // printf("3\n");
+    // if (exponent <= 23)
+    if (exponent < 31)
+        return uf & casting_mask;
+
+    // case: 0x7f000000  ->  0 111_1 111_0 000.....
+    // 지수가 크다면 값을 키워줘야한다.
+    // anything out of range ...
+    // 2^31 이상부터 overflow 그냥 overflow다. 즉, e >31
+    return (0x80000000u);
 }
 /*
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
