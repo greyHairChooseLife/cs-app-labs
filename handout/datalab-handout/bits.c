@@ -300,7 +300,7 @@ int logicalNeg(int x)
     //  따라서 이를 수행한 뒤에 0은 1로, 0이 아닌 것은 1로 만드는 연산을 수행하면 될 것 같다.
     //  0의 보수는 여전히 0인 점을 활용해 보수를 `|` 연산 해준다. 그럼 0이 아닌 애들은 msb가 항상 1이된다.
     int classify_zero = x | (~x + 1); // 0 또는 0이 아닌 애들로 구분됨
-    return (!(classify_zero >> 31)) & 1;
+    return ((~classify_zero >> 31) & 1); // 반대로 출력해야하니까 비트 반전을 하고, msb를 lsb로 몰아넣고난 뒤에 반환
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
