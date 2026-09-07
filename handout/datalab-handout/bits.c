@@ -405,9 +405,8 @@ int howManyBits(int x)
     mask_e = ((!is_less_then_e << 31) >> 31);
     _x = _x >> (1 & mask_e);
     result = result + (1 & mask_e);
-    // pintf("%#034b, %d, %d, %d\n", _x, _x, is_less_then_e, result);
-    // result = (((!!result << 31) >> 31) & (result + 1 + 1)) | (((!result << 31) >> 31) & 1);// 양수든 음수든 부호 비트 하나는 필요하고, 아래 방식이면 자리수가 1비트 만큼 덜 표현된다.
-    result = 1 + (((!!result << 31) >> 31) & (result)) + _x; // 부호 비트 + 누적 result + _x(1 or 0)
+
+    result = 1 + result + _x; // 부호 비트 + 누적 result + _x(2 or 1 or 0)
     return (result);
 }
 // float
