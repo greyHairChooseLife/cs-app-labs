@@ -493,7 +493,7 @@ int floatFloat2Int(unsigned uf)
     // printf("expo: %d\n", exponent);
     // int fraction = uf & f_mask;
 
-    int casting_mask = (1 >> 23) & 1 << (exponent <= 23 ? 23 - exponent : 0);
+    int casting_mask = (1 >> 23) & (1 << (exponent <= 23 ? 23 - exponent : 0));
 
     // 예외처리
     int is_exponent_field_all_1 = ((uf & e_mask) >> 23) == 0xFF;
