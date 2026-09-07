@@ -459,7 +459,7 @@ unsigned floatScale2(unsigned uf)
         return (((uf << 1) >> 1) * 2) | sign_bit;
 
     if (is_infinit)
-        return uf | sign_bit;
+        return uf;
 
     // normal case: exponent+1 to double
     return (uf & ~exponent_field_masking) | (exponent_field_value + 1) << 23;
