@@ -271,14 +271,18 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
-    // WARN: 와 이거 틀렸다. x가 INT_MIN일 때 틀림. 이놈들 경계값 체크를 안하네
+    int is_same_sign = !!((x >> 31) & (y >> 31)) | !!(~(x >> 31) & ~(y >> 31));
 
     // x가 더 크면 0을 리턴
     // => if (y - x < 0) && return (0);
     // 음수인지 확인은 msb로
     int difference = y + (~x + 1);
     int is_difference_negative = (difference >> 31) & 1;
-    return (!is_difference_negative);
+
+    //  y가 양수일 때만 참
+    int when_sign_diff = !((y >> 31) & 1);
+
+    return (is_same_sign & !is_difference_negative) | ((!is_same_sign) & when_sign_diff);
 }
 // 4
 /*
