@@ -1,0 +1,69 @@
+session_name: datalab
+start_directory: ${HOME}/P/labs/datalab
+suppress_history: false
+
+windows:
+    # --- grade: driver / dlc / btest ---
+    - window_name: grade
+      start_directory: ${HOME}/P/labs/datalab/handout/datalab-handout
+      layout: 057d,256x75,0,0{78x75,0,0,17,177x75,79,0[177x37,79,0,29,177x37,79,38,30]}
+      panes:
+        - shell_command:
+            - tm.1_title 'driver'
+            - watch 'perl driver.pl'
+          focus: true
+
+        - shell_command:
+            - tm.1_title 'dlc'
+            - watch 'make && ./dlc -z bits.c'
+
+        - shell_command:
+            - tm.1_title 'btest'
+            - watch 'make && ./btest'
+
+    # --- solve: bits.c + sy.c ---
+    - window_name: solve
+      start_directory: ${HOME}/P/labs/datalab/handout/datalab-handout
+      focus: true
+      layout: f7d0,114x67,0,0{56x67,0,0,23,57x67,57,0[57x33,57,0{15x33,57,0,34,41x33,73,0,38},57x33,57,34,35]}
+      panes:
+        - shell_command:
+            - tm.1_title 'bits.c'
+            - vi bits.c
+          focus: true
+
+        - shell_command:
+            - tm.1_title 'sy.c'
+            - vi sy.c
+
+        - shell_command:
+            - tm.1_title 'sy'
+            - watch 'gcc sy.c bits.c -o sy && ./sy'
+
+        - shell_command:
+            - tm.1_title 'shell'
+
+    # --- pdf / files ---
+    - window_name: pdf
+      layout: even-horizontal
+      panes:
+        - shell_command:
+            - tm.1_title 'yazi'
+            - y
+
+        - shell_command:
+            - tm.1_title 'yazi'
+            - pdftotext -layout datalab.pdf - | nvim
+          focus: true
+
+    # --- learn ---
+    - window_name: learn
+      layout: even-horizontal
+      panes:
+        - shell_command:
+            - tm.1_title 'datalab'
+          focus: true
+
+        - start_directory: ${HOME}/P/teach/floats/lessons
+          shell_command:
+            - tm.1_title 'floats'
